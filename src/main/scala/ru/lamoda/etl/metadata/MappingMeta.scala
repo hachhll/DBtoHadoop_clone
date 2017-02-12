@@ -23,6 +23,11 @@ class MappingMeta {
   var groupName:String = ""
   var tableName:String = ""
 
+  // spark metaData
+  var sparkJob = ""
+  var sparkJobMain = ""
+  var sparkArgs: Array[String] = Array("")
+
   def getSrcSQL: String = {
     """SELECT
     id_sales_order_item
@@ -73,7 +78,7 @@ class MappingMeta {
       where updated_at >= str_to_date('20170207155959', '%Y%m%d%H%i%s')"""
   }
 
-  def loadMetaTable() = {
+  def loadMetaTable {
     val clList = Array(
       //Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal)
       ("id_sales_order_item", true, "integer", false),
@@ -132,5 +137,18 @@ class MappingMeta {
     groupName = "bob"
     tableName = "sales_order_item"
     output_file_name = "test2.output"
+
+    // spark metaData
+    sparkJob = "spark_tmptoparquet-1.0-SNAPSHOT.jar"
+    sparkJobMain = "ru.lamoda.etl.Spark_TmpToParquet"
+
+    sparkArgs = Array("tableName=" + tableName)
+    sparkArgs :+= "inc_id=" + inc_id
+    sparkArgs :+= "fieldDelim=\\;"
+    var listOfColumns = ""
+    for (column <- clList) {
+      listOfColumns += column._1.toString + ","
+    }
+    sparkArgs :+= "filedList=" + listOfColumns.dropRight(1)
   }
 }

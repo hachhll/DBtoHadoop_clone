@@ -2,13 +2,17 @@ package ru.lamoda.etl.hadoop
 
 import java.io.File
 
+import knobs.Config
 import org.apache.hadoop.fs.{FileSystem, Path}
-import ru.lamoda.etl.config.Config
+import ru.lamoda.etl.metadata.MappingMeta
 
 /**
   * Created by gevorg.hachaturyan on 18/01/2017.
   */
-class MovingFiles {
+class MovingFiles(configParams: Config, mapMeta: MappingMeta, hdfscon: FileSystem) {
+
+  val srcLocalFolder: String = configParams.require[String]("common.root_dir") + "/" + mapMeta.groupName + "/" + mapMeta.tableName
+  val destHDFSFolder: String = configParams.require[String]("hadoop.hdfsHiveDefaultField") + "/" + mapMeta.groupName + "/" + mapMeta.tableName + "_" + mapMeta.inc_id
 
   def fromLocalToHDFS(delFiles: Boolean, srcLocalFolder: String, tableName: String, hdfs: FileSystem): Unit = {
 
@@ -22,20 +26,20 @@ class MovingFiles {
     }
   }
 
-  def copyLocalToHDFS(configParams: Config): Unit = {
+  def copyLocalToHDFS {
 
     val delFiles = false
     fromLocalToHDFS(delFiles,
-      configParams.localDefaultField + "/" + configParams.tableName,
-      configParams.hdfsHiveDefaultField + "/" + configParams.tableName + configParams.inc_id,
-      configParams.getHDFSConn)
+      srcLocalFolder,
+      destHDFSFolder,
+      hdfscon)
   }
 
-  def moveLocalToHDFS(configParams: Config): Unit = {
+  def moveLocalToHDFS {
     val delFiles = true
     fromLocalToHDFS(delFiles,
-      configParams.localDefaultField + "/" + configParams.tableName,
-      configParams.hdfsHiveDefaultField + "/" + configParams.tableName + configParams.inc_id,
-      configParams.getHDFSConn)
+      srcLocalFolder,
+      destHDFSFolder,
+      hdfscon)
   }
 }
