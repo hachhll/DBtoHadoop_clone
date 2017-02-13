@@ -13,16 +13,24 @@ class MovingFiles(configParams: Config, mapMeta: MappingMeta, hdfscon: FileSyste
 
   val srcLocalFolder: String = configParams.require[String]("common.root_dir") + "/" + mapMeta.groupName + "/" + mapMeta.tableName
   val destHDFSFolder: String = configParams.require[String]("hadoop.hdfsHiveDefaultField") + "/" + mapMeta.groupName + "/" + mapMeta.tableName + "_" + mapMeta.inc_id
+  var exitStatus: Int = _
+  var exitMessage: String = _
 
   def fromLocalToHDFS(delFiles: Boolean, srcLocalFolder: String, tableName: String, hdfs: FileSystem): Unit = {
 
     val destPath = new Path(tableName.toString).toUri.toString
 
-    if (!hdfs.exists(new Path(destPath))) hdfs.mkdirs(new Path(destPath))
-    // Create dir if not exist
-    val filesList = new File(srcLocalFolder).listFiles().filter(_.isFile).toList // Get list of local files
-    for (nameFile <- filesList) {
-      hdfs.copyFromLocalFile(delFiles, new Path(nameFile.toURI.toString), new Path(destPath)) // Move files to hdfs
+    try {
+      if (!hdfs.exists(new Path(destPath))) hdfs.mkdirs(new Path(destPath))
+      // Create dir if not exist
+      val filesList = new File(srcLocalFolder).listFiles().filter(_.isFile).toList // Get list of local files
+      for (nameFile <- filesList) {
+        hdfs.copyFromLocalFile(delFiles, new Path(nameFile.toURI.toString), new Path(destPath)) // Move files to hdfs
+      }
+    } catch {
+      case ex: Exception =>
+        exitStatus = 1001
+        exitMessage = ex.getMessage
     }
   }
 

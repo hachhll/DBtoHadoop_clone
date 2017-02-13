@@ -38,9 +38,9 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
     line => println(line)
   }
 
-  importJob.exitCode.map {
-    case 0 => "Import done, exit code 0."
-    case exitCode => "Error, process ended with exit code $exitCode."
-  }
+//    importJob.exitCode.map {
+//      case 0 => "Import done, exit code 0."
+//      case exitCode => "Error, process ended with exit code $exitCode."
+//    }
 
 }

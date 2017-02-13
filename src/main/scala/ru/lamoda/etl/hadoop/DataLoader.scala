@@ -10,19 +10,29 @@ import ru.lamoda.etl.metadata.MappingMeta
   */
 class DataLoader(configParams: Config, mapMeta: MappingMeta) {
 
-  def getHDFSConn: FileSystem = {
-    val hadoopConf = new Configuration()
-    hadoopConf.addResource(new Path(configParams.require[String]("hadoop.hdpConfDir") + "/core-site.xml"))
-    hadoopConf.addResource(new Path(configParams.require[String]("hadoop.hdpConfDir") + "/hdfs-site.xml"))
-    hadoopConf.addResource(new Path(configParams.require[String]("hadoop.hdpConfDir") + "/ssl-client.xml"))
-    val hdfs = FileSystem.get(hadoopConf)
-    hdfs
-  }
+  val hadoopConf = new Configuration()
+  hadoopConf.addResource(new Path(configParams.require[String]("hadoop.hdpConfDir") + "/core-site.xml"))
+  hadoopConf.addResource(new Path(configParams.require[String]("hadoop.hdpConfDir") + "/hdfs-site.xml"))
+  hadoopConf.addResource(new Path(configParams.require[String]("hadoop.hdpConfDir") + "/ssl-client.xml"))
+  var exitStatus: Int = _
+  var exitMessage: String = _
+  var execSparkJob: SparkExecute = _
 
   // Moving files from local to HDFS
-  val mvFiles = new MovingFiles(configParams, mapMeta, getHDFSConn)
-  mvFiles.copyLocalToHDFS // In Prod need to Use moveLocalToHDFS
+  def executeMovingFiles: DataLoader = {
+    try {
+      val mvFiles = new MovingFiles(configParams, mapMeta, FileSystem.get(hadoopConf))
+      mvFiles.copyLocalToHDFS // In Prod need to Use moveLocalToHDFS
+    } catch {
+      case ex: Exception =>
+        exitStatus = 1001
+        exitMessage = ex.getMessage
+    }
+    this
+  }
 
-  new SparkExecute(configParams, mapMeta)
-
+  def executeSparkJob: DataLoader = {
+    execSparkJob = new SparkExecute(configParams, mapMeta)
+    this
+  }
 }
