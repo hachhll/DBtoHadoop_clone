@@ -1,17 +1,19 @@
 package ru.lamoda.etl
 
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
 
 /**
- * Unit test for simple App.
- */
+  * Unit test for simple App.
+  */
 class AppTest {
-    /**
-     * Rigourous Test :-)
-     */
-    @Test
-    def testApp():Unit={
-        assertTrue( true )
-    }
+  /**
+    * Rigourous Test :-)
+    */
+  @Test
+  def testApp(): Unit = {
+
+    assertTrue(true)
+
+  }
 }

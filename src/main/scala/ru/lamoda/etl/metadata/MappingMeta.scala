@@ -9,24 +9,19 @@ import scala.collection.mutable
   */
 
 class MappingMeta {
-  val colColumnName = new DataColumn[String]("column_name",Iterable[String]())
-  val colIsExistsInSource = new DataColumn[Boolean]("is_exists_in_source",Iterable[Boolean]())
-  val colColumnType = new DataColumn[String]("column_type",Iterable[String]())
-  val colIsIncVal = new DataColumn[Boolean]("is_inc_val",Iterable[Boolean]())
-  var columnList = DataTable("default", Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal)).get
+  val colColumnName = new DataColumn[String]("column_name", Iterable[String]())
+  val colIsExistsInSource = new DataColumn[Boolean]("is_exists_in_source", Iterable[Boolean]())
+  val colColumnType = new DataColumn[String]("column_type", Iterable[String]())
+  val colIsIncVal = new DataColumn[Boolean]("is_inc_val", Iterable[Boolean]())
+  var columnList: DataTable = DataTable("default", Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal)).get
 
-  val srcConParams = mutable.Map.empty[String,String]
-  var srcConName:String = ""
-  var inc_id:Integer = -1
-  var source_system_id:Integer = -1
-  var output_file_name:String = ""
-  var groupName:String = ""
-  var tableName:String = ""
-
-  // spark metaData
-  var sparkJob = ""
-  var sparkJobMain = ""
-  var sparkArgs: Array[String] = Array("")
+  val srcConParams = mutable.Map.empty[String, String]
+  var srcConName: String = ""
+  var inc_id: Integer = -1
+  var source_system_id: Integer = -1
+  var output_file_name: String = ""
+  var groupName: String = ""
+  var tableName: String = ""
 
   def getSrcSQL: String = {
     """SELECT
@@ -122,33 +117,20 @@ class MappingMeta {
       ("fk_axapta_status", true, "integer", false),
       ("axapta_status_last_change", true, "date", false)
     )
-    for(column <- clList) {
+    for (column <- clList) {
       columnList = columnList.rows.add(DataValue(column._1), DataValue(column._2), DataValue(column._3), DataValue(column._4)).get
     }
 
     //pentaho.ktr_file_name
     srcConName = "bob"
-    srcConParams +=  "db_host" -> "localhost"
-    srcConParams +=  "db_port" -> "3306"
-    srcConParams +=  "db_user" -> "dwh"
-    srcConParams +=  "db_password" -> "GhaikFud"
-    srcConParams +=  "db_database" -> "bob_kz"
+    srcConParams += "db_host" -> "localhost"
+    srcConParams += "db_port" -> "3306"
+    srcConParams += "db_user" -> "dwh"
+    srcConParams += "db_password" -> "GhaikFud"
+    srcConParams += "db_database" -> "bob_kz"
     inc_id = 99
     groupName = "bob"
     tableName = "sales_order_item"
     output_file_name = "test2.output"
-
-    // spark metaData
-    sparkJob = "spark_tmptoparquet-1.0-SNAPSHOT.jar"
-    sparkJobMain = "ru.lamoda.etl.Spark_TmpToParquet"
-
-    sparkArgs = Array("tableName=" + tableName)
-    sparkArgs :+= "inc_id=" + inc_id
-    sparkArgs :+= "fieldDelim=\\;"
-    var listOfColumns = ""
-    for (column <- clList) {
-      listOfColumns += column._1.toString + ","
-    }
-    sparkArgs :+= "filedList=" + listOfColumns.dropRight(1)
   }
 }
