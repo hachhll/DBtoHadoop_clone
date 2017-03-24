@@ -21,13 +21,12 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
 
   private val handler = new SparkLauncher(env.asJava)
 
-  private val sparkParams = scala.collection.mutable.Map[String, String](
-    "sparkJobFolder" -> configParams.require[String]("spark.sparkJobFolder"),
+  private val sparkParams = scala.collection.mutable.Map[String, Any](
+    "sparkJavaHome" -> configParams.require[String]("spark.sparkJavaHome"),
     "sparkHome" -> configParams.require[String]("spark.sparkHome"),
     "sparkMaster" -> configParams.require[String]("spark.sparkMaster"),
-    "sparkJavaHome" -> configParams.require[String]("spark.sparkJavaHome"),
-    "sparkJob" -> configParams.require[String]("spark.sparkJob"),
-    "sparkJobMain" -> configParams.require[String]("spark.sparkJobMain")
+    "sparkDriverAllowMultipleContexts" -> configParams.require[Boolean]("spark.sparkDriverAllowMultipleContexts"),
+    "sparkEventLogEnabled" -> configParams.require[Boolean]("spark.sparkEventLogEnabled")
   )
 
   private var sparkArgs: Array[String] = _
@@ -40,7 +39,7 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
     row.as[Boolean]("is_exists_in_source").equals(true)
   })
 
-  var listOfColumns: String = _
+  var listOfColumns: String = ""
   dataView.foreach(row => {
     listOfColumns += row.as[String]("column_name").toString + ","
   })
@@ -48,18 +47,27 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
   sparkArgs :+= "filedList=" + listOfColumns.dropRight(1)
 
 
-  def prepareSPK {
+  def prepareSPK(spkProperties: SparkExecProperties): Unit = {
 
     handler
+      // From config file
       //.setPropertiesFile(configParams.require[String]("spark.sparkJobConfFile"))
-      .setAppResource(sparkParams("sparkJobFolder") + "/" + sparkParams("sparkJob")) // Lint to spark job with jar
-      .setMainClass(sparkParams("sparkJobMain")) // spark job main class
-      .setSparkHome(sparkParams("sparkHome")) // spark-submit home folder on cluster node
-      .setAppName(sparkParams("sparkJobMain"))
-      .setMaster(sparkParams("sparkMaster"))
-      .setJavaHome(sparkParams("sparkJavaHome"))
-      //.setConf("spark.app.id", configParams.sparkJobMain)
+      .setConf("spark.java.home", sparkParams("sparkJavaHome").toString)
+      .setConf("spark.home", sparkParams("sparkHome").toString)
+      .setConf("spark.master", sparkParams("sparkMaster").toString)
+      .setConf("spark.driver.allowMultipleContexts", sparkParams("sparkDriverAllowMultipleContexts").toString)
+      .setConf("spark.eventLog.enabled", sparkParams("sparkEventLogEnabled").toString)
       .setVerbose(true)
+      // Dynamic params
+      .setAppResource(spkProperties.getSparkJobFolder + "/" + spkProperties.getSparkJob) // Lint to spark job with jar
+      .setMainClass(spkProperties.getSparkJobMain) // spark job main class
+      .setAppName(spkProperties.getSparkJobMain)
+      .setConf("spark.driver.memory", spkProperties.getDriverMemory)
+      .setConf("spark.akka.frameSize", spkProperties.getAkkaFrameSize)
+      .setConf("spark.default.parallelism", spkProperties.getDefaultParallelism)
+      .setConf("spark.executor.cores", spkProperties.getExecutorCores)
+      .setConf("spark.executor.instances", spkProperties.getExecutorInstances)
+      .setConf("spark.executor.memory", spkProperties.getExecutorMemory)
       .addAppArgs(sparkArgs: _*)
   }
 
@@ -74,11 +82,6 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
     importJob.stdoutIterator.foreach {
       line => println(line)
     }
-
-    //    importJob.exitCode.map {
-    //      case 0 => "Import done, exit code 0."
-    //      case exitCode => "Error, process ended with exit code $exitCode."
-    //    }
   }
 
 

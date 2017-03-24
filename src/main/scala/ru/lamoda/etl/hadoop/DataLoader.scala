@@ -21,18 +21,28 @@ class DataLoader(configParams: Config, mapMeta: MappingMeta) {
   // Moving files from local to HDFS
   def executeMovingFiles: DataLoader = {
     try {
-      val mvFiles = new MovingFiles(configParams, mapMeta, FileSystem.get(hadoopConf))
+      val fs = FileSystem.get(hadoopConf)
+      val mvFiles = new MovingFiles(configParams, mapMeta, fs)
       mvFiles.copyLocalToHDFS // In Prod need to Use moveLocalToHDFS
     } catch {
       case ex: Exception =>
-        exitStatus = 1001
-        exitMessage = ex.getMessage
+        ex.printStackTrace()
+        throw ex
     }
     this
   }
 
   def executeSparkJob: DataLoader = {
-    execSparkJob = new SparkExecute(configParams, mapMeta)
+    try {
+      execSparkJob = new SparkExecute(configParams, mapMeta)
+      val dynSparkJobParam = new SparkExecProperties
+      execSparkJob.prepareSPK(dynSparkJobParam)
+      execSparkJob.executeSPK
+    } catch {
+      case ex: Exception =>
+        ex.printStackTrace()
+        throw ex
+    }
     this
   }
 }

@@ -16,38 +16,54 @@ class MovingFiles(configParams: Config, mapMeta: MappingMeta, hdfscon: FileSyste
   var exitStatus: Int = _
   var exitMessage: String = _
 
-  def fromLocalToHDFS(delFiles: Boolean, srcLocalFolder: String, tableName: String, hdfs: FileSystem): Unit = {
+  def fromLocalToHDFS(delFiles: Boolean, srcLocalFolder: String, tableName: String, hdfs: org.apache.hadoop.fs.FileSystem): Unit = {
 
     val destPath = new Path(tableName.toString).toUri.toString
 
     try {
-      if (!hdfs.exists(new Path(destPath))) hdfs.mkdirs(new Path(destPath))
+      if (!hdfs.exists(new Path(destPath))) {
+        println(s"Create folder: $destPath")
+        hdfs.mkdirs(new Path(destPath))
+      }
       // Create dir if not exist
       val filesList = new File(srcLocalFolder).listFiles().filter(_.isFile).toList // Get list of local files
       for (nameFile <- filesList) {
         hdfs.copyFromLocalFile(delFiles, new Path(nameFile.toURI.toString), new Path(destPath)) // Move files to hdfs
       }
-    } catch {
+
+    }
+    catch {
       case ex: Exception =>
-        exitStatus = 1001
-        exitMessage = ex.getMessage
+        ex.printStackTrace()
+        throw ex
     }
   }
 
   def copyLocalToHDFS {
-
-    val delFiles = false
-    fromLocalToHDFS(delFiles,
-      srcLocalFolder,
-      destHDFSFolder,
-      hdfscon)
+    try {
+      val delFiles = false
+      fromLocalToHDFS(delFiles,
+        srcLocalFolder,
+        destHDFSFolder,
+        hdfscon)
+    } catch {
+      case ex: Exception =>
+        ex.printStackTrace()
+        throw ex
+    }
   }
 
   def moveLocalToHDFS {
-    val delFiles = true
-    fromLocalToHDFS(delFiles,
-      srcLocalFolder,
-      destHDFSFolder,
-      hdfscon)
+    try {
+      val delFiles = true
+      fromLocalToHDFS(delFiles,
+        srcLocalFolder,
+        destHDFSFolder,
+        hdfscon)
+    } catch {
+      case ex: Exception =>
+        ex.printStackTrace()
+        throw ex
+    }
   }
 }

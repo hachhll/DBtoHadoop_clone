@@ -28,7 +28,7 @@ object App {
   def main(args: Array[String]): Unit = {
     val conf = new Conf(args)  // Note: This line also works for "object Main extends App"
 
-    //Must be in unput parameters
+    //Must be in input parameters
     val rootDir = new File(".").getAbsolutePath
 
     val generalConfig: Task[Config] = knobs.loadImmutable(Required(FileResource(new File(rootDir + "/config/common.cfg"))) :: Nil)
@@ -39,7 +39,9 @@ object App {
     mapMeta.loadMetaTable
 
     val pentahoTTF = new PentahoTableToFile(config ++ cnf, mapMeta)
+    println("Prepare Pentaho KTR ...")
     pentahoTTF.prepareKTR
+    println("Execute Pentaho KTR ...")
     pentahoTTF.executeKTR
     println("Execution result: ")
     for (row <- pentahoTTF.getResult) {
@@ -49,12 +51,13 @@ object App {
     // File transfer
     val dataLoader = new DataLoader(config ++ cnf, mapMeta)
 
-    val resMVExecute = dataLoader.executeMovingFiles
-    println("Moving files result: ")
-    if (resMVExecute.exitStatus != 0) println("Moving files was done.")
-    else {
-      println("Moving files was faild.")
-      println(resMVExecute.exitMessage)
+    println("Moving files")
+    try {
+      val resMVExecute = dataLoader.executeMovingFiles
+    }catch{
+      case ex: Exception =>
+        ex.printStackTrace()
+        System.exit(dataLoader.exitStatus)
     }
 
     // Spark execute
@@ -62,7 +65,7 @@ object App {
     println("Spark Job '"+config.require[String]("spark.sparkJob")+"' result: ")
     resSparkExecute.execSparkJob.importJob.exitCode.map {
       case 0 => "Import done, exit code 0."
-      case exitCode => "Error, process ended with exit code $exitCode."
+      case exitCode => s"Error, process ended with exit code $exitCode."
     }
   }
 }
