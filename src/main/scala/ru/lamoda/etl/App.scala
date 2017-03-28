@@ -28,7 +28,7 @@ object App {
   def main(args: Array[String]): Unit = {
     val conf = new Conf(args)  // Note: This line also works for "object Main extends App"
 
-    //Must be in input parameters
+    //Must be in unput parameters
     val rootDir = new File(".").getAbsolutePath
 
     val generalConfig: Task[Config] = knobs.loadImmutable(Required(FileResource(new File(rootDir + "/config/common.cfg"))) :: Nil)
