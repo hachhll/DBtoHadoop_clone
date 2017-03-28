@@ -26,7 +26,7 @@ class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
 
 object App {
   def main(args: Array[String]): Unit = {
-    val conf = new Conf(args)  // Note: This line also works for "object Main extends App"
+    val conf = new Conf(args) // Note: This line also works for "object Main extends App"
 
     //Must be in unput parameters
     val rootDir = new File(".").getAbsolutePath
@@ -54,7 +54,7 @@ object App {
     println("Moving files")
     try {
       val resMVExecute = dataLoader.executeMovingFiles()
-    }catch{
+    } catch {
       case ex: Exception =>
         ex.printStackTrace()
         System.exit(dataLoader.exitStatus)
@@ -62,7 +62,7 @@ object App {
 
     // Spark execute
     val resSparkExecute = dataLoader.executeSparkJob()
-    println("Spark Job '"+config.require[String]("spark.sparkJob")+"' result: ")
+    println("Spark Job '" + config.require[String]("spark.sparkJob") + "' result: ")
     resSparkExecute.execSparkJob.importJob.exitCode().map {
       case 0 => "Import done, exit code 0."
       case exitCode => s"Error, process ended with exit code $exitCode."
