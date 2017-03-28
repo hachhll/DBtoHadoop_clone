@@ -16,7 +16,7 @@ class MovingFiles(configParams: Config, mapMeta: MappingMeta, hdfscon: FileSyste
   var exitStatus: Int = _
   var exitMessage: String = _
 
-  def fromLocalToHDFS(delFiles: Boolean, srcLocalFolder: String, tableName: String, hdfs: org.apache.hadoop.fs.FileSystem): Unit = {
+  def fromLocalToHDFS(delFiles: Boolean, srcLocalFolder: String, tableName: String, hdfs: FileSystem): Unit = {
 
     val destPath = new Path(tableName.toString).toUri.toString
 
