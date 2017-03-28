@@ -39,7 +39,7 @@ class MovingFiles(configParams: Config, mapMeta: MappingMeta, hdfscon: FileSyste
     }
   }
 
-  def copyLocalToHDFS {
+  def copyLocalToHDFS(): Unit = {
     try {
       val delFiles = false
       fromLocalToHDFS(delFiles,
@@ -53,7 +53,7 @@ class MovingFiles(configParams: Config, mapMeta: MappingMeta, hdfscon: FileSyste
     }
   }
 
-  def moveLocalToHDFS {
+  def moveLocalToHDFS(): Unit = {
     try {
       val delFiles = true
       fromLocalToHDFS(delFiles,

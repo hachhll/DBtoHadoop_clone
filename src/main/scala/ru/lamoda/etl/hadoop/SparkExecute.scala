@@ -71,15 +71,15 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
       .addAppArgs(sparkArgs: _*)
   }
 
-  def executeSPK {
+  def executeSPK(): Unit = {
 
     importJob = new SparkImportJob(handler.launch())
 
-    importJob.stderrIterator.foreach {
+    importJob.stderrIterator().foreach {
       line => println(line)
     }
 
-    importJob.stdoutIterator.foreach {
+    importJob.stdoutIterator().foreach {
       line => println(line)
     }
   }

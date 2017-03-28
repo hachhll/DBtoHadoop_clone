@@ -8,15 +8,15 @@ import scala.io.Source
   */
 class SparkImportJob(process: Process)(implicit executionContext: ExecutionContext) {
 
-  def exitCode: Future[Int] = Future {
+  def exitCode(): Future[Int] = Future {
     process.waitFor()
   }
 
-  def stderrIterator: Iterator[String] = {
+  def stderrIterator(): Iterator[String] = {
     Source.fromInputStream(process.getErrorStream).getLines()
   }
 
-  def stdoutIterator: Iterator[String] = {
+  def stdoutIterator(): Iterator[String] = {
     Source.fromInputStream(process.getInputStream).getLines()
   }
 }

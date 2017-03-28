@@ -36,13 +36,13 @@ object App {
     val cnf: Config = new Config(Map("common.root_dir" -> knobs.CfgText(rootDir)))
 
     val mapMeta = new MappingMeta()
-    mapMeta.loadMetaTable
+    mapMeta.loadMetaTable()
 
     val pentahoTTF = new PentahoTableToFile(config ++ cnf, mapMeta)
     println("Prepare Pentaho KTR ...")
-    pentahoTTF.prepareKTR
+    pentahoTTF.prepareKTR()
     println("Execute Pentaho KTR ...")
-    pentahoTTF.executeKTR
+    pentahoTTF.executeKTR()
     println("Execution result: ")
     for (row <- pentahoTTF.getResult) {
       println(row._1 + " ==> " + row._2)
@@ -53,7 +53,7 @@ object App {
 
     println("Moving files")
     try {
-      val resMVExecute = dataLoader.executeMovingFiles
+      val resMVExecute = dataLoader.executeMovingFiles()
     }catch{
       case ex: Exception =>
         ex.printStackTrace()
@@ -61,9 +61,9 @@ object App {
     }
 
     // Spark execute
-    val resSparkExecute = dataLoader.executeSparkJob
+    val resSparkExecute = dataLoader.executeSparkJob()
     println("Spark Job '"+config.require[String]("spark.sparkJob")+"' result: ")
-    resSparkExecute.execSparkJob.importJob.exitCode.map {
+    resSparkExecute.execSparkJob.importJob.exitCode().map {
       case 0 => "Import done, exit code 0."
       case exitCode => s"Error, process ended with exit code $exitCode."
     }

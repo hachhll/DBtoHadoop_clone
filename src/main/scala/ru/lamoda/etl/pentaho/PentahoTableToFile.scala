@@ -22,25 +22,25 @@ class PentahoTableToFile(val config: Config, val mapMeta: MappingMeta) {
   EnvUtil.environmentInit()
   var tm = new TransMeta(config.require[String]("common.root_dir")  + "/config/pentaho/" + config.require[String]("pentaho.ktr_file_name"))
 
-  def setConnection: Unit ={
+  def setConnection(): Unit ={
     //set required connection from shared.xml file
     //program looks for <connection_name>.xml in config/pentaho folder
     //<connection_name> is case sensitive
     val so = new SharedObjects(config.require[String]("common.root_dir")  + "/config/pentaho/" + mapMeta.srcConName + ".xml") // loads shared.xml
-    tm.findStep("input_table").getStepMetaInterface().asInstanceOf[TableInputMeta]
+    tm.findStep("input_table").getStepMetaInterface.asInstanceOf[TableInputMeta]
       .setDatabaseMeta(so.getSharedDatabase(mapMeta.srcConName))
   }
 
-  def setSQL: Unit ={
+  def setSQL(): Unit ={
     //set required connection from shared.xml file
     //program looks for <connection_name>.xml in config/pentaho folder
     //<connection_name> is case sensitive
     val so = new SharedObjects(config.require[String]("common.root_dir")  + "/config/pentaho/" + mapMeta.srcConName + ".xml") // loads shared.xml
-    tm.findStep("input_table").getStepMetaInterface().asInstanceOf[TableInputMeta]
+    tm.findStep("input_table").getStepMetaInterface.asInstanceOf[TableInputMeta]
       .setSQL(mapMeta.getSrcSQL)
   }
 
-  def setParameters: Unit ={
+  def setParameters(): Unit ={
     //Setup input parameters for connection (must be in cycle
     //and standard input
 
@@ -53,9 +53,9 @@ class PentahoTableToFile(val config: Config, val mapMeta: MappingMeta) {
     trans.addParameterDefinition("p_output_file_dir", config.require[String]("pentaho.data_directory") + "/" + mapMeta.groupName + "/" + mapMeta.tableName, "")
   }
 
-  def setColumnsInGeneralOutput: Unit ={
+  def setColumnsInGeneralOutput(): Unit ={
     //add column into general output
-    val fileOutputMeta = tm.findStep("Text file output").getStepMetaInterface().asInstanceOf[TextFileOutputMeta]
+    val fileOutputMeta = tm.findStep("Text file output").getStepMetaInterface.asInstanceOf[TextFileOutputMeta]
     var tffArray = Array[TextFileField]()
 
     val dataView = mapMeta.columnList.filter(row => {
@@ -72,9 +72,9 @@ class PentahoTableToFile(val config: Config, val mapMeta: MappingMeta) {
     fileOutputMeta.setOutputFields(tffArray)
   }
 
-  def setColumnsInGroupByOutput: Unit ={
+  def setColumnsInGroupByOutput(): Unit ={
     //add column into "group by" output
-    val selValMeta = tm.findStep("Select for group").getStepMetaInterface().asInstanceOf[SelectValuesMeta]
+    val selValMeta = tm.findStep("Select for group").getStepMetaInterface.asInstanceOf[SelectValuesMeta]
     var smcArray = Array[SelectMetadataChange]()
 
     val dataView = mapMeta.columnList.filter(row => {
@@ -97,28 +97,28 @@ class PentahoTableToFile(val config: Config, val mapMeta: MappingMeta) {
     selValMeta.setMeta(smcArray)
   }
 
-  def prepareKTR: PentahoTableToFile ={
+  def prepareKTR(): PentahoTableToFile ={
     trans = new Trans(tm)
-    this.setConnection
-    this.setSQL
-    this.setColumnsInGeneralOutput
-    this.setParameters
-    this.setColumnsInGroupByOutput
-    return this
+    this.setConnection()
+    this.setSQL()
+    this.setColumnsInGeneralOutput()
+    this.setParameters()
+    this.setColumnsInGroupByOutput()
+    this
   }
 
-  def executeKTR: PentahoTableToFile ={
+  def executeKTR(): PentahoTableToFile ={
     //clear target directory
     val path = Path.fromString(config.require[String]("pentaho.data_directory") + "/" + mapMeta.groupName + "/" + mapMeta.tableName)
     Try(path.deleteRecursively(continueOnFailure = false))
     //execute transformation in synchronous mode
     trans.execute(null)
     trans.waitUntilFinished()
-    return this
+    this
   }
 
   def getResult: Array[(String, String)] ={
-    Array(("result", trans.getResult().getExitStatus().toString()),
+    Array(("result", trans.getResult.getExitStatus.toString),
       ("row_count", trans.getVariable("row_count")),
       ("min_val", trans.getVariable("min_val")),
       ("max_val", trans.getVariable("max_val")))

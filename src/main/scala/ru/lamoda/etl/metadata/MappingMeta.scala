@@ -73,7 +73,7 @@ class MappingMeta {
       where updated_at >= str_to_date('20170207155959', '%Y%m%d%H%i%s')"""
   }
 
-  def loadMetaTable {
+  def loadMetaTable(): Unit = {
     val clList = Array(
       //Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal)
       ("id_sales_order_item", true, "integer", false),
