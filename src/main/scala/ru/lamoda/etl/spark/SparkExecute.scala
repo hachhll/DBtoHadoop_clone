@@ -29,6 +29,7 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
     "sparkEventLogEnabled" -> configParams.require[Boolean]("spark.sparkEventLogEnabled")
   )
 
+  @throws(classOf[Exception])
   def prepareSPK(spkProperties: SparkExecProperties): Unit = {
 
     handler
@@ -53,14 +54,13 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
       .addAppArgs(spkProperties.getSparkArgs: _*)
   }
 
+  @throws(classOf[Exception])
   def executeSPK(): Unit = {
 
     importJob = new SparkImportJob(handler.launch())
-
     importJob.stderrIterator().foreach {
       line => println(line)
     }
-
     importJob.stdoutIterator().foreach {
       line => println(line)
     }

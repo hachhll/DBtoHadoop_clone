@@ -29,10 +29,10 @@ object App {
     val conf = new Conf(args) // Note: This line also works for "object Main extends App"
 
     //Must be in unput parameters
-    val rootDir = new File(".").getAbsolutePath
+    val rootDir: String = new File(".").getAbsolutePath
 
     val generalConfig: Task[Config] = knobs.loadImmutable(Required(FileResource(new File(rootDir + "/config/common.cfg"))) :: Nil)
-    val config = generalConfig.unsafePerformSync
+    val config: Config = generalConfig.unsafePerformSync
     val cnf: Config = new Config(Map("common.root_dir" -> knobs.CfgText(rootDir)))
 
     val mapMeta = new MappingMeta()
@@ -53,7 +53,7 @@ object App {
 
     println("Moving files")
     try {
-      val resMVExecute = dataLoader.executeMovingFiles()
+      val resMVExecute: DataLoader = dataLoader.executeMovingFiles()
     } catch {
       case ex: Exception =>
         ex.printStackTrace()
@@ -61,11 +61,22 @@ object App {
     }
 
     // Spark execute
-    val resSparkExecute = dataLoader.executeSparkJob()
-    println("Spark Job '" + config.require[String]("spark.sparkJob") + "' result: ")
-    resSparkExecute.execSparkJob.importJob.exitCode().map {
-      case 0 => "Import done, exit code 0."
-      case exitCode => s"Error, process ended with exit code $exitCode."
+    try {
+      val resSparkExecute: DataLoader = dataLoader.executeSparkJob()
+      println("Spark Job '" + config.require[String]("spark.sparkJob") + "' result: ")
+      resSparkExecute.execSparkJob.importJob.exitCode().map {
+        case 0 => "Import done, exit code 0."
+        case exitCode => s"Error, process ended with exit code $exitCode."
+      }
+    } catch {
+      case e: java.lang.IllegalStateException =>
+        println("    It need to set before run:\n" +
+          "    export HADOOP_HOME=/opt/cloudera/parcels/CDH-5.9.0-1.cdh5.9.0.p0.23/lib/hadoop\n" +
+          "    export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native\n" +
+          "    export HADOOP_OPTS=\"-Djava.library.path=$HADOOP_HOME/lib\"\n" +
+          "    export SPARK_HOME=/opt/cloudera/parcels/CDH-5.9.0-1.cdh5.9.0.p0.23/lib/spark\n" +
+          "    export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera")
+      case e: Exception => e.printStackTrace()
     }
   }
 }
