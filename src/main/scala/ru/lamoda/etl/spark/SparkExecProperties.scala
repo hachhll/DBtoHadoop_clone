@@ -1,19 +1,20 @@
-package ru.lamoda.etl.hadoop
+package ru.lamoda.etl.spark
 
 /**
   * Created by gevorg.hachaturyan on 21/02/2017.
   */
 class SparkExecProperties {
 
-  private var driverMemory = "512M"
-  private var akkaFrameSize = "20"
-  private var executorMemory = "1G"
-  private var executorInstances = "5"
-  private var executorCores = "5"
-  private var defaultParallelism = "10"
-  private var sparkJob = "spark_tmptoparquet-1.0-SNAPSHOT.jar"
-  private var sparkJobMain = "ru.lamoda.etl.Spark_TmpToParquet"
-  private var sparkJobFolder = "/home/gevorg.hachaturyan/spark-job/spark_tmptoparquet/target"
+  private var driverMemory: String = "512M"
+  private var akkaFrameSize: String = "20"
+  private var executorMemory: String = "1G"
+  private var executorInstances: String = "5"
+  private var executorCores: String = "5"
+  private var defaultParallelism: String = "10"
+  private var sparkJob: String = "spark_tmptoparquet-1.0-SNAPSHOT.jar"
+  private var sparkJobMain: String = "ru.lamoda.etl.Spark_TmpToParquet"
+  private var sparkJobFolder: String = "/home/gevorg.hachaturyan/spark-job/spark_tmptoparquet/target"
+  private var sparkArgs: Array[String] = _
 
   def getDriverMemory: String = {
     driverMemory
@@ -51,6 +52,10 @@ class SparkExecProperties {
     sparkJobFolder
   }
 
+  def getSparkArgs: Array[String] = {
+    sparkArgs
+  }
+
   def setDriverMemory(value: String) {
     driverMemory = value
   }
@@ -85,6 +90,10 @@ class SparkExecProperties {
 
   def setSparkJobFolder(value: String) {
     sparkJobFolder = value
+  }
+
+  def setSparkArgs(value: Array[String]) {
+    sparkArgs = value
   }
 
 }

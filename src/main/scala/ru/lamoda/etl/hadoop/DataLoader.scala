@@ -4,6 +4,7 @@ import knobs.Config
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import ru.lamoda.etl.metadata.MappingMeta
+import ru.lamoda.etl.spark.{SparkExecProperties, SparkExecute}
 
 /**
   * Created by gevorg.hachaturyan on 27/01/2017.
@@ -21,7 +22,7 @@ class DataLoader(configParams: Config, mapMeta: MappingMeta) {
   // Moving files from local to HDFS
   @throws(classOf[Exception])
   def executeMovingFiles(): DataLoader = {
-    val fs = FileSystem.get(hadoopConf)
+    val fs: FileSystem = FileSystem.get(hadoopConf)
     val mvFiles = new MovingFiles(configParams, mapMeta, fs)
     mvFiles.copyLocalToHDFS() // In Prod need to Use moveLocalToHDFS
     this
@@ -31,6 +32,28 @@ class DataLoader(configParams: Config, mapMeta: MappingMeta) {
   def executeSparkJob(): DataLoader = {
     execSparkJob = new SparkExecute(configParams, mapMeta)
     val dynSparkJobParam = new SparkExecProperties
+
+    dynSparkJobParam.setSparkJob("spark_tmptoparquet-1.0-SNAPSHOT.jar")
+    dynSparkJobParam.setSparkJobMain("ru.lamoda.etl.Spark_TmpToParquet")
+    dynSparkJobParam.setSparkJobFolder(configParams.require[String]("spark.sparkJobFolder") + "/spark_tmptoparquet/target")
+
+    var sparkArgs: Array[String] = Array("")
+
+    sparkArgs = Array("tableName=" + mapMeta.tableName)
+    sparkArgs :+= "inc_id=" + mapMeta.inc_id
+    sparkArgs :+= "fieldDelim=" + configParams.require[String]("spark.fieldDelim")
+
+    var listOfColumns: String = ""
+    mapMeta.columnList.filter(row => {
+      row.as[Boolean]("is_exists_in_source").equals(true)
+    }).foreach(row => {
+      listOfColumns += row.as[String]("column_name").toString + ","
+    })
+
+    sparkArgs :+= "filedList=" + listOfColumns.dropRight(1)
+
+    dynSparkJobParam.setSparkArgs(sparkArgs)
+
     execSparkJob.prepareSPK(dynSparkJobParam)
     execSparkJob.executeSPK()
     this

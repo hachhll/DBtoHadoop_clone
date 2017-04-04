@@ -1,4 +1,4 @@
-package ru.lamoda.etl.hadoop
+package ru.lamoda.etl.spark
 
 import knobs.Config
 import org.apache.spark.launcher.SparkLauncher
@@ -21,31 +21,13 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
 
   private val handler = new SparkLauncher(env.asJava)
 
-  private val sparkParams = scala.collection.mutable.Map[String, Any](
+  private val sparkParams = Map(
     "sparkJavaHome" -> configParams.require[String]("spark.sparkJavaHome"),
     "sparkHome" -> configParams.require[String]("spark.sparkHome"),
     "sparkMaster" -> configParams.require[String]("spark.sparkMaster"),
     "sparkDriverAllowMultipleContexts" -> configParams.require[Boolean]("spark.sparkDriverAllowMultipleContexts"),
     "sparkEventLogEnabled" -> configParams.require[Boolean]("spark.sparkEventLogEnabled")
   )
-
-  private var sparkArgs: Array[String] = _
-
-  sparkArgs = Array("tableName=" + mapMeta.tableName)
-  sparkArgs :+= "inc_id=" + mapMeta.inc_id
-  sparkArgs :+= "fieldDelim=" + configParams.require[String]("spark.fieldDelim")
-
-  private val dataView = mapMeta.columnList.filter(row => {
-    row.as[Boolean]("is_exists_in_source").equals(true)
-  })
-
-  var listOfColumns: String = ""
-  dataView.foreach(row => {
-    listOfColumns += row.as[String]("column_name").toString + ","
-  })
-
-  sparkArgs :+= "filedList=" + listOfColumns.dropRight(1)
-
 
   def prepareSPK(spkProperties: SparkExecProperties): Unit = {
 
@@ -68,7 +50,7 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
       .setConf("spark.executor.cores", spkProperties.getExecutorCores)
       .setConf("spark.executor.instances", spkProperties.getExecutorInstances)
       .setConf("spark.executor.memory", spkProperties.getExecutorMemory)
-      .addAppArgs(sparkArgs: _*)
+      .addAppArgs(spkProperties.getSparkArgs: _*)
   }
 
   def executeSPK(): Unit = {
@@ -83,6 +65,5 @@ class SparkExecute(configParams: Config, mapMeta: MappingMeta) {
       line => println(line)
     }
   }
-
 
 }
