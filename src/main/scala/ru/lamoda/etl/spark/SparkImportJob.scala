@@ -1,4 +1,4 @@
-package ru.lamoda.etl.hadoop
+package ru.lamoda.etl.spark
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
