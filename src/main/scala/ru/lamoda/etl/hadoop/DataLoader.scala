@@ -43,10 +43,12 @@ class DataLoader(configParams: Config, mapMeta: MappingMeta) {
     sparkArgs :+= "inc_id=" + mapMeta.inc_id
     sparkArgs :+= "fieldDelim=" + configParams.require[String]("spark.fieldDelim")
 
+
+    var listOfColumns: String = ""
     sparkArgs :+= "filedList=" + mapMeta.columnList.filter(row => {
       row.as[Boolean]("is_exists_in_source").equals(true)
     }).foreach(row => {
-      row.as[String]("column_name").toString + ","
+      listOfColumns += row.as[String]("column_name").toString + ","
     }).toString.dropRight(1)
 
     dynSparkJobParam.setSparkArgs(sparkArgs)
