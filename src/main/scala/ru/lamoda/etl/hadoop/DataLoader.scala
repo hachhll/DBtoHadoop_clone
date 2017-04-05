@@ -45,11 +45,13 @@ class DataLoader(configParams: Config, mapMeta: MappingMeta) {
 
 
     var listOfColumns: String = ""
-    sparkArgs :+= "filedList=" + mapMeta.columnList.filter(row => {
+    mapMeta.columnList.filter(row => {
       row.as[Boolean]("is_exists_in_source").equals(true)
     }).foreach(row => {
       listOfColumns += row.as[String]("column_name").toString + ","
-    }).toString.dropRight(1)
+    })
+
+    sparkArgs :+= "filedList=" + listOfColumns.dropRight(1)
 
     dynSparkJobParam.setSparkArgs(sparkArgs)
 
