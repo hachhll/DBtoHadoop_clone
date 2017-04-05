@@ -124,7 +124,7 @@ class MappingMeta {
     //pentaho.ktr_file_name
     srcConName = "bob"
     srcConParams += "db_host" -> "localhost"
-    srcConParams += "db_port" -> "3306"
+    srcConParams += "db_port" -> "5432"
     srcConParams += "db_user" -> "dwh"
     srcConParams += "db_password" -> "GhaikFud"
     srcConParams += "db_database" -> "bob_kz"
