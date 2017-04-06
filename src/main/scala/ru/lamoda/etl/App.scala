@@ -5,17 +5,13 @@ import java.io.File
 import knobs.{Config, FileResource, Required}
 import org.rogach.scallop.ScallopConf
 import ru.lamoda.etl.hadoop.DataLoader
+import ru.lamoda.etl.hive.HiveSQLGen
 import ru.lamoda.etl.metadata.MappingMeta
 import ru.lamoda.etl.pentaho.PentahoTableToFile
 
 import scala.collection.immutable.Map
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz.concurrent.Task
-
-/**
-  * Hello world!
-  *
-  */
 
 class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val apples = opt[Int](required = false)
@@ -78,5 +74,26 @@ object App {
           "    export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera")
       case e: Exception => e.printStackTrace()
     }
+
+    val hiveSQL: HiveSQLGen = new HiveSQLGen(mapMeta)
+    // hive sql generator
+    try {
+
+      val hiveSQLOn: HiveSQLGen = hiveSQL.setHiveSQLOnDate("20160101", "updated_at")
+
+      // hive sql validator
+      try {
+
+        val sqlValidation: String = hiveSQLOn.hiveSQLValidate
+        println(sqlValidation)
+
+      } catch {
+        case e: Exception => e.printStackTrace()
+      }
+
+    } catch {
+      case e: Exception => e.printStackTrace()
+    }
+
   }
 }

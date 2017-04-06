@@ -23,6 +23,11 @@ class MappingMeta {
   var groupName: String = ""
   var tableName: String = ""
 
+  var whereCaseField = new DataColumn[String]("whereCaseField", Iterable[String]())
+  var whereCaseType = new DataColumn[String]("whereCaseType", Iterable[String]())
+  var whereCaseVal = new DataColumn[Any]("whereCaseVal", Iterable[Any]())
+  var whereCase: DataTable = DataTable("default", Seq(whereCaseField, whereCaseType, whereCaseVal)).get
+
   def getSrcSQL: String = {
     """SELECT
     id_sales_order_item
@@ -121,6 +126,8 @@ class MappingMeta {
       columnList = columnList.rows.add(DataValue(column._1), DataValue(column._2), DataValue(column._3), DataValue(column._4)).get
     }
 
+
+
     //pentaho.ktr_file_name
     srcConName = "bob"
     srcConParams += "db_host" -> "localhost"
@@ -132,5 +139,18 @@ class MappingMeta {
     groupName = "bob"
     tableName = "sales_order_item"
     output_file_name = "test2.output"
+  }
+
+  def whereCaseTable(): Unit = {
+    val clList = Array(
+      //Seq(whereCaseField, whereCaseType, whereCaseVal)
+      ("id_sales_order_item", "=", false),
+      ("sku", "is not", "null"),
+      ("color", "like", "'%black%'"),
+      ("axapta_status_last_change", ">=", "current_date")
+    )
+    for (column <- clList) {
+      whereCase = whereCase.rows.add(DataValue(column._1), DataValue(column._2), DataValue(column._3)).get
+    }
   }
 }
