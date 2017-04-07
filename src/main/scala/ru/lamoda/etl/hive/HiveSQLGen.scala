@@ -13,81 +13,96 @@ class HiveSQLGen(mapMeta: MappingMeta) {
   @throws(classOf[Exception])
   def setHiveSQLOnDate(byValue: String, fieldName: String): HiveSQLGen = {
 
-    var listOfColumns: String = ""
-    mapMeta.columnList.filter(row => {
-      row.as[Boolean]("is_exists_in_source").equals(true)
-    }).foreach(row => {
-      listOfColumns += row.as[String]("column_name").toString + ","
-    })
+    val hiveListOfColumns = new HiveListOfColumns()
+    hiveListOfColumns.setListOfBK(mapMeta)
+    hiveListOfColumns.setListOfColumns(mapMeta)
+    hiveListOfColumns.setAdditionalCases(mapMeta)
+    hiveListOfColumns.setListOfColumnsOver(mapMeta, hiveListOfColumns.getListOfBK, fieldName)
 
-    val whereCase: String = s" AND ${fieldName} <= " + setStringToDateTimeForHive(byValue, "yyyyMMdd")
+    val whereCase: String = s" AND ${fieldName} <= " + hiveListOfColumns.genStringToDateTimeForHive(byValue, "yyyyMMdd")
 
-    var additionalCases: String = ""
-    mapMeta.whereCase.foreach(row => {
-      additionalCases += " AND " + row.as[String]("whereCaseField").toString + " " +
-        row.as[String]("whereCaseType").toString + " " +
-        row.as[String]("whereCaseVal").toString
-    })
-
-    setHiveSQL(listOfColumns.dropRight(1), mapMeta.tableName, whereCase, additionalCases)
+    setHiveSQL(hiveListOfColumns.getListOfColumns, hiveListOfColumns.getListOfColumnsOver, mapMeta.tableName, whereCase, hiveListOfColumns.getAdditionalCases, hiveListOfColumns.getListOfBK, fieldName)
     this
   }
 
   @throws(classOf[Exception])
   def setHiveSQLPeriodDate(fromValue: String, toValue: String, fieldName: String): HiveSQLGen = {
 
-    var listOfColumns: String = ""
-    mapMeta.columnList.filter(row => {
-      row.as[Boolean]("is_exists_in_source").equals(true)
-    }).foreach(row => {
-      listOfColumns += row.as[String]("column_name").toString + ","
-    })
+    val hiveListOfColumns = new HiveListOfColumns()
+    hiveListOfColumns.setListOfBK(mapMeta)
+    hiveListOfColumns.setListOfColumns(mapMeta)
+    hiveListOfColumns.setAdditionalCases(mapMeta)
+    hiveListOfColumns.setListOfColumnsOver(mapMeta, hiveListOfColumns.getListOfBK, fieldName)
 
-    val whereCase: String = s" AND ${fieldName} BETWEEN " + setStringToDateTimeForHive(fromValue, "yyyyMMdd") + " AND " + setStringToDateTimeForHive(toValue, "yyyyMMdd")
+    val whereCase: String = s" AND ${fieldName} BETWEEN " + hiveListOfColumns.genStringToDateTimeForHive(fromValue, "yyyyMMdd") + " AND " + hiveListOfColumns.genStringToDateTimeForHive(toValue, "yyyyMMdd")
 
-    var additionalCases: String = ""
-    mapMeta.whereCase.foreach(row => {
-      additionalCases += " AND " + row.as[String]("whereCaseField").toString + " " +
-        row.as[String]("whereCaseType").toString + " " +
-        row.as[String]("whereCaseVal").toString
-    })
-
-    setHiveSQL(listOfColumns.dropRight(1), mapMeta.tableName, whereCase, additionalCases)
+    setHiveSQL(hiveListOfColumns.getListOfColumns, hiveListOfColumns.getListOfColumnsOver, mapMeta.tableName, whereCase, hiveListOfColumns.getAdditionalCases, hiveListOfColumns.getListOfBK, fieldName)
     this
   }
 
   @throws(classOf[Exception])
-  def setHiveSQLPeriodNumber(fromValue: String, toValue: String, fieldName: String): HiveSQLGen = {
+  def setHiveSQLPeriodNumber(fromValue: Integer, toValue: Integer, fieldName: String): HiveSQLGen = {
 
-    var listOfColumns: String = ""
-    mapMeta.columnList.filter(row => {
-      row.as[Boolean]("is_exists_in_source").equals(true)
-    }).foreach(row => {
-      listOfColumns += row.as[String]("column_name").toString + ","
-    })
+    val hiveListOfColumns = new HiveListOfColumns()
+    hiveListOfColumns.setListOfBK(mapMeta)
+    hiveListOfColumns.setListOfColumns(mapMeta)
+    hiveListOfColumns.setAdditionalCases(mapMeta)
+    hiveListOfColumns.setListOfColumnsOver(mapMeta, hiveListOfColumns.getListOfBK, fieldName)
 
     val whereCase: String = s" AND ${fieldName} BETWEEN " + fromValue + " AND " + toValue
 
-    var additionalCases: String = ""
-    mapMeta.whereCase.foreach(row => {
-      additionalCases += " AND " + row.as[String]("whereCaseField").toString + " " +
-        row.as[String]("whereCaseType").toString + " " +
-        row.as[String]("whereCaseVal").toString
-    })
-
-    setHiveSQL(listOfColumns.dropRight(1), mapMeta.tableName, whereCase, additionalCases)
+    setHiveSQL(hiveListOfColumns.getListOfColumns, hiveListOfColumns.getListOfColumnsOver, mapMeta.tableName, whereCase, hiveListOfColumns.getAdditionalCases, hiveListOfColumns.getListOfBK, fieldName)
     this
   }
 
-  private def setHiveSQL(listOfColumns: String, tableName: String, whereCase: String, additionalCases: String) {
+  private def setHiveSQL(listOfColumns: String, ListOfColumnsOver: String, tableName: String, whereCase: String, additionalCases: String, listOfBK: String, fieldName: String) {
 
-    hiveSQLValidate = " SELECT " + listOfColumns + " FROM " + tableName + " WHERE 0=1" + whereCase + additionalCases
-    hiveSQL = " SELECT " + listOfColumns + " FROM " + tableName + " WHERE 1=1" + whereCase + additionalCases
+//    select
+//    key1, key2, val1, val2, val3, valdate
+//    from
+//    (
+//      select
+//        key1,
+//      key2,
+//      z.valdate,
+//      max(val1) over (partition by key1, key2 order by valdate desc) as val1,
+//      max(val2) over (partition by key1, key2 order by valdate desc) as val2,
+//      max(val3) over (partition by key1, key2 order by valdate desc) as val3,
+//      max(valdate) over (partition by key1, key2 order by valdate desc) as valdate_new
+//        from test_table z
+//    ) k
+//      where k.valdate_new = k.valdate
+
+
+    hiveSQLValidate = " SELECT \n" +
+      listOfBK +
+      listOfColumns +
+      fieldName +
+      " \nFROM ( SELECT \n" +
+      listOfBK +
+      ListOfColumnsOver +
+      fieldName +
+      " FROM " +
+      tableName +
+      " WHERE 0=1" +
+      whereCase +
+      additionalCases +
+      ") res \n WHERE res." + fieldName + " = res.max_" + fieldName
+
+    hiveSQL = " SELECT \n" +
+      listOfBK +
+      listOfColumns +
+      fieldName +
+      " \nFROM ( SELECT \n" +
+      listOfBK +
+      ListOfColumnsOver +
+      fieldName +
+      " FROM " +
+      tableName +
+      " WHERE 1=1" +
+      whereCase +
+      additionalCases +
+      ") res \n WHERE res." + fieldName + " = res.max_" + fieldName
   }
 
-  private def setStringToDateTimeForHive(value: String, pattern: String): String = {
-
-    s"to_utc_timestamp(from_unixtime(unix_timestamp('${value}', '${pattern}')),'MSK')"
-
-  }
 }

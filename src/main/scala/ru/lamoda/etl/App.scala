@@ -33,6 +33,7 @@ object App {
 
     val mapMeta = new MappingMeta()
     mapMeta.loadMetaTable()
+    mapMeta.whereCaseTable()
 
     val pentahoTTF = new PentahoTableToFile(config ++ cnf, mapMeta)
     println("Prepare Pentaho KTR ...")
@@ -79,17 +80,15 @@ object App {
     // hive sql generator
     try {
 
-      val hiveSQLOn: HiveSQLGen = hiveSQL.setHiveSQLOnDate("20160101", "updated_at")
-
-      // hive sql validator
-      try {
-
-        val sqlValidation: String = hiveSQLOn.hiveSQLValidate
-        println(sqlValidation)
-
-      } catch {
-        case e: Exception => e.printStackTrace()
-      }
+      val hiveSQLOnDate: HiveSQLGen = hiveSQL.setHiveSQLOnDate("20160101", "updated_at")
+      val sqlValidation: String = hiveSQLOnDate.hiveSQLValidate
+      println(sqlValidation)
+      val hiveSQLPeriodDate: HiveSQLGen = hiveSQL.setHiveSQLPeriodDate("20160101", "20160101", "updated_at")
+      val sqlValidation1: String = hiveSQLPeriodDate.hiveSQLValidate
+      println(sqlValidation1)
+      val hiveSQLPeriodNumber: HiveSQLGen = hiveSQL.setHiveSQLPeriodNumber(1, 2, "inc_id")
+      val sqlValidation2: String = hiveSQLPeriodNumber.hiveSQLValidate
+      println(sqlValidation2)
 
     } catch {
       case e: Exception => e.printStackTrace()

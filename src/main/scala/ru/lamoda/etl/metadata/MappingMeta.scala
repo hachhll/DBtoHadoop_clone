@@ -13,7 +13,8 @@ class MappingMeta {
   val colIsExistsInSource = new DataColumn[Boolean]("is_exists_in_source", Iterable[Boolean]())
   val colColumnType = new DataColumn[String]("column_type", Iterable[String]())
   val colIsIncVal = new DataColumn[Boolean]("is_inc_val", Iterable[Boolean]())
-  var columnList: DataTable = DataTable("default", Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal)).get
+  val colIsBK = new DataColumn[Boolean]("is_bk", Iterable[Boolean]())
+  var columnList: DataTable = DataTable("default", Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal, colIsBK)).get
 
   val srcConParams = mutable.Map.empty[String, String]
   var srcConName: String = ""
@@ -80,50 +81,50 @@ class MappingMeta {
 
   def loadMetaTable(): Unit = {
     val clList = Array(
-      //Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal)
-      ("id_sales_order_item", true, "integer", false),
-      ("old_column", false, "integer", false),
-      ("fk_sales_order", true, "integer", false),
-      ("fk_payment_status", true, "integer", false),
-      ("fk_sales_order_item_shipment", true, "integer", false),
-      ("item_nr", true, "text", false),
-      ("base_cost", true, "number", false),
-      ("base_price", true, "number", false),
-      ("unit_price", true, "number", false),
-      ("codfee_amount", true, "number", false),
-      ("coupon_money_value", true, "number", false),
-      ("coupon_percent", true, "number", false),
-      ("coupon_refundable", true, "integer", false),
-      ("coupon_category", true, "text", false),
-      ("name", true, "text", false),
-      ("sku", true, "text", false),
-      ("barcode", true, "text", false),
-      ("description", true, "text", false),
-      ("weight", true, "number", false),
-      ("color", true, "number", false),
-      ("created_at", true, "date", false),
-      ("updated_at", true, "date", true),
-      ("last_payment_status_change", true, "date", false),
-      ("amount_paid", true, "number", false),
-      ("refunded_money", true, "number", false),
-      ("refunded_voucher", true, "number", false),
-      ("tax_percent", true, "number", false),
-      ("product_size", true, "text", false),
-      ("fk_delivery_status", true, "integer", false),
-      ("delivery_status_last_change", true, "date", false),
-      ("fk_status_list_main", true, "integer", false),
-      ("status_main_last_change", true, "date", false),
-      ("fk_stock_warehouse", true, "integer", false),
-      ("fk_refund", true, "integer", false),
-      ("is_gift", true, "integer", false),
-      ("fk_refund_status", true, "integer", false),
-      ("refund_status_last_change", true, "date", false),
-      ("loyalty_money_value", true, "number", false),
-      ("fk_axapta_status", true, "integer", false),
-      ("axapta_status_last_change", true, "date", false)
+      //Seq(colColumnName, colIsExistsInSource, colColumnType, colIsIncVal, colIsBK)
+      ("id_sales_order_item", true, "integer", false, false),
+      ("old_column", false, "integer", false, false),
+      ("fk_sales_order", true, "integer", false, true),
+      ("fk_payment_status", true, "integer", false, true),
+      ("fk_sales_order_item_shipment", true, "integer", false, true),
+      ("item_nr", true, "text", false, false),
+      ("base_cost", true, "number", false, false),
+      ("base_price", true, "number", false, false),
+      ("unit_price", true, "number", false, false),
+      ("codfee_amount", true, "number", false, false),
+      ("coupon_money_value", true, "number", false, false),
+      ("coupon_percent", true, "number", false, false),
+      ("coupon_refundable", true, "integer", false, false),
+      ("coupon_category", true, "text", false, false),
+      ("name", true, "text", false, false),
+      ("sku", true, "text", false, false),
+      ("barcode", true, "text", false, false),
+      ("description", true, "text", false, false),
+      ("weight", true, "number", false, false),
+      ("color", true, "number", false, false),
+      ("created_at", true, "date", false, false),
+      ("updated_at", true, "date", true, false),
+      ("last_payment_status_change", true, "date", false, false),
+      ("amount_paid", true, "number", false, false),
+      ("refunded_money", true, "number", false, false),
+      ("refunded_voucher", true, "number", false, false),
+      ("tax_percent", true, "number", false, false),
+      ("product_size", true, "text", false, false),
+      ("fk_delivery_status", true, "integer", false, false),
+      ("delivery_status_last_change", true, "date", false, false),
+      ("fk_status_list_main", true, "integer", false, false),
+      ("status_main_last_change", true, "date", false, false),
+      ("fk_stock_warehouse", true, "integer", false, true),
+      ("fk_refund", true, "integer", false, true),
+      ("is_gift", true, "integer", false, false),
+      ("fk_refund_status", true, "integer", false, true),
+      ("refund_status_last_change", true, "date", false, false),
+      ("loyalty_money_value", true, "number", false, false),
+      ("fk_axapta_status", true, "integer", false, true),
+      ("axapta_status_last_change", true, "date", false, false)
     )
     for (column <- clList) {
-      columnList = columnList.rows.add(DataValue(column._1), DataValue(column._2), DataValue(column._3), DataValue(column._4)).get
+      columnList = columnList.rows.add(DataValue(column._1), DataValue(column._2), DataValue(column._3), DataValue(column._4), DataValue(column._5)).get
     }
 
 
