@@ -40,6 +40,8 @@ class DataLoader(configParams: Config, mapMeta: MappingMeta) {
     var sparkArgs: Array[String] = Array("")
 
     sparkArgs = Array("tableName=" + mapMeta.tableName)
+    sparkArgs :+= "groupName=" + mapMeta.groupName
+    sparkArgs :+= "defaultLocation=" + configParams.require[String]("hadoop.hdfsHiveDefaultField")
     sparkArgs :+= "inc_id=" + mapMeta.inc_id
     sparkArgs :+= "fieldDelim=" + configParams.require[String]("spark.fieldDelim")
 

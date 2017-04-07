@@ -60,7 +60,7 @@ object App {
     // Spark execute
     try {
       val resSparkExecute: DataLoader = dataLoader.executeSparkJob()
-      println("Spark Job '" + config.require[String]("spark.sparkJob") + "' result: ")
+      //println("Spark Job '" + config.require[String]("spark.sparkJob") + "' result: ")
       resSparkExecute.execSparkJob.importJob.exitCode().map {
         case 0 => "Import done, exit code 0."
         case exitCode => s"Error, process ended with exit code $exitCode."
