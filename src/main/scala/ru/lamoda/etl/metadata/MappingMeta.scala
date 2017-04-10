@@ -148,6 +148,7 @@ class MappingMeta {
       ("id_sales_order_item", "=", false),
       ("sku", "is not", "null"),
       ("color", "like", "'%black%'"),
+
       ("axapta_status_last_change", ">=", "current_date")
     )
     for (column <- clList) {
